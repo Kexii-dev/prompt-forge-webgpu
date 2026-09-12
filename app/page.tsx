@@ -32,7 +32,7 @@ export default function Home() {
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start w-full max-w-3xl">
         <h1 className="text-2xl font-bold">Prompt Forge WebGPU</h1>
         <textarea
           className="w-full h-40 p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -50,8 +50,8 @@ export default function Home() {
             {loading ? 'Génération...' : 'Générer'}
           </button>
         </div>
-        <div className="w-full p-4 border border-gray-300 rounded">
-          <pre>{response}</pre>
+        <div className="w-full max-w-full p-4 border border-gray-300 rounded max-h-96 overflow-y-auto overflow-x-hidden">
+          <pre className="whitespace-pre-wrap break-all">{response}</pre>
         </div>
         <select
           className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
