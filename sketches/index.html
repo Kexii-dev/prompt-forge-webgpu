@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquettes — Prompt Forge</title>
+<style>
+  body { font-family: system-ui, sans-serif; background:#0b0d10; color:#e6e9ee; margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .wrap { max-width: 520px; width: 100%; padding: 32px 20px; }
+  h1 { font-size: 20px; margin: 0 0 4px; } p { color:#8b94a1; font-size:13.5px; margin:0 0 24px; }
+  a.card {
+    display:block; text-decoration:none; color:inherit; background:#12151a;
+    border:1px solid #232830; border-radius:12px; padding:18px 20px; margin-bottom:14px;
+  }
+  a.card:hover { border-color:#6366f1; }
+  .card b { font-size:15px; } .card span { display:block; color:#8b94a1; font-size:13px; margin-top:5px; line-height:1.5; }
+  .tag { float:right; font-size:11px; color:#6366f1; border:1px solid #6366f1; border-radius:999px; padding:2px 9px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Prompt Forge — 3 directions</h1>
+  <p>Maquettes HTML statiques, cliquables. Ouvre sur mobile ET desktop pour comparer.</p>
+  <a class="card" href="./001-studio-console/"><span class="tag">recommandé</span><b>01 · Studio Console</b><span>Panneau latéral paramètres + zone de sortie large. Desktop-first, drawer « Modèle » sur mobile. Le plus fidèle à l'app actuelle.</span></a>
+  <a class="card" href="./002-chat-minimal/"><b>02 · Chat Minimal</b><span>Style conversation, mobile-first. Paramètres cachés dans un bottom sheet. Le plus grand public.</span></a>
+  <a class="card" href="./003-lab-dense/"><b>03 · Lab Dense</b><span>Monospace, tout visible, prompt/output côte à côte, métriques live. Le plus orienté power-user.</span></a>
+</div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Forge — Lab Dense</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0c;
+    --panel: #101014;
+    --border: #1f1f26;
+    --fg: #d7dae0;
+    --muted: #6f7684;
+    --acc: #e8b23a;
+    --acc2: #4ec9b0;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg); color: var(--fg); font-size: 13px;
+    min-height: 100vh; display: flex; flex-direction: column;
+  }
+  header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 8px 14px; border-bottom: 1px solid var(--border); background: var(--panel);
+    font-family: var(--mono); font-size: 12px;
+  }
+  .logo { color: var(--acc); font-weight: 600; }
+  .tabs { display: flex; gap: 2px; margin-left: 8px; }
+  .tabs a { color: var(--muted); text-decoration: none; padding: 5px 10px; border-radius: 4px; }
+  .tabs a.active { background: var(--border); color: var(--fg); }
+  .stats { margin-left: auto; display: flex; gap: 14px; color: var(--muted); }
+  .stats b { color: var(--acc2); font-weight: 500; }
+  main { flex: 1; display: grid; grid-template-rows: auto 1fr auto; }
+  .toolbar {
+    display: flex; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--border);
+    flex-wrap: wrap; align-items: center; background: var(--panel);
+  }
+  .tb-label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  select, .num {
+    background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 4px; font-family: var(--mono); font-size: 12px; padding: 5px 8px;
+  }
+  .num { width: 62px; }
+  .workspace { display: grid; grid-template-columns: 1fr 1fr; min-height: 0; }
+  .pane { display: flex; flex-direction: column; min-width: 0; }
+  .pane + .pane { border-left: 1px solid var(--border); }
+  .pane-head {
+    font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .08em; padding: 8px 14px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+  }
+  .pane-body { flex: 1; padding: 14px; overflow-y: auto; }
+  textarea, .result {
+    width: 100%; height: 100%; background: transparent; border: 0; outline: none; resize: none;
+    color: var(--fg); font-family: var(--mono); font-size: 13px; line-height: 1.7;
+  }
+  .result { white-space: pre-wrap; color: #b9c8c4; }
+  .result .hl { color: var(--acc2); }
+  footer {
+    display: flex; gap: 10px; align-items: center; padding: 10px 14px;
+    border-top: 1px solid var(--border); background: var(--panel);
+  }
+  .btn {
+    background: var(--acc); color: #111; border: 0; border-radius: 4px;
+    font-family: var(--mono); font-weight: 600; font-size: 12.5px; padding: 9px 20px; cursor: pointer;
+  }
+  .btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .kv { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-left: auto; display: flex; gap: 14px; }
+  .kv b { color: var(--fg); font-weight: 500; }
+  @media (max-width: 760px) {
+    .workspace { grid-template-columns: 1fr; grid-template-rows: 45vh 1fr; }
+    .pane + .pane { border-left: 0; border-top: 1px solid var(--border); }
+    .stats { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">▚ prompt_forge</span>
+  <div class="tabs"><a href="#" class="active">run</a><a href="#">compare</a><a href="#">config</a></div>
+  <div class="stats"><span>vram <b>1.9/4.0G</b></span><span>gpu <b>RTX2050</b></span><span><b>24.3 t/s</b></span></div>
+</header>
+<main>
+  <div class="toolbar">
+    <span class="tb-label">model</span>
+    <select><option>llama-3.2-3b-instruct</option><option>qwen3-4b</option><option>phi-3.5-mini</option></select>
+    <span class="tb-label">temp</span><input class="num" type="number" value="0.7" step="0.1">
+    <span class="tb-label">top_p</span><input class="num" type="number" value="0.9" step="0.05">
+    <span class="tb-label">max_tok</span><input class="num" type="number" value="512">
+    <span class="tb-label">seed</span><input class="num" type="number" value="42">
+  </div>
+  <div class="workspace">
+    <div class="pane">
+      <div class="pane-head"><span>prompt</span><span id="cc">68 chars</span></div>
+      <div class="pane-body"><textarea id="p">Explique-moi le concept de sparsity dans les transformers en une phrase simple.</textarea></div>
+    </div>
+    <div class="pane">
+      <div class="pane-head"><span>output</span><span id="state">idle</span></div>
+      <div class="pane-body"><div class="result" id="res"><span class="hl">›</span> La sparsity dans les transformers signifie qu'on ne calcule pas toutes les connexions possibles entre les tokens, mais seulement un sous-ensemble pertinent — ce qui réduit drastiquement le coût de calcul tout en conservant l'essentiel des performances.</div></div>
+    </div>
+  </div>
+  <footer>
+    <button class="btn" onclick="run()">▶ run</button>
+    <button class="btn ghost">save preset</button>
+    <button class="btn ghost">history (3)</button>
+    <div class="kv"><span>lat <b id="lat">—</b></span><span>tok <b id="tok">—</b></span><span>cache <b>hit</b></span></div>
+  </footer>
+</main>
+<script>
+const p = document.getElementById('p');
+p.addEventListener('input', () => document.getElementById('cc').textContent = p.value.length + ' chars');
+function run(){
+  document.getElementById('state').textContent = 'running…';
+  const t0 = performance.now();
+  const res = document.getElementById('res');
+  const full = "La sparsity dans les transformers signifie qu'on ne calcule pas toutes les connexions possibles entre les tokens, mais seulement un sous-ensemble pertinent — moins de calcul, qualité quasi identique.";
+  res.innerHTML = '<span class="hl">›</span> ';
+  let i = 0;
+  const iv = setInterval(()=>{
+    res.innerHTML = '<span class="hl">›</span> ' + full.slice(0, i); i += 4;
+    document.getElementById('tok').textContent = Math.round(i/4/((performance.now()-t0)/1000)) + ' t/s';
+    if (i >= full.length) { clearInterval(iv);
+      document.getElementById('state').textContent = 'done';
+      document.getElementById('lat').textContent = ((performance.now()-t0)/1000).toFixed(1) + 's';
+    }
+  }, 25);
+}
+</script>
+</body>
+</html>

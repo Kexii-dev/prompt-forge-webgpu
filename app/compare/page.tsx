@@ -45,36 +45,49 @@ export default function ComparePage() {
     });
   };
 
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-gray-950">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start text-white">
-        <h1 className="text-2xl font-bold">Comparaison A/B</h1>
-        <textarea
-          className="w-full h-40 p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Entrez votre input ici..."
-        />
-        <div className="flex justify-between items-center">
-          <button
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-500 text-white gap-2 hover:bg-blue-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            onClick={handleGenerate}
-            disabled={loadingA || loadingB}
-          >
-            {loadingA || loadingB ? 'Génération...' : 'Générer'}
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="w-full p-4 border border-gray-300 rounded bg-gray-900">
-            <h2 className="text-lg font-bold">Réponse A</h2>
-            <pre>{responseA}</pre>
-          </div>
-          <div className="w-full p-4 border border-gray-300 rounded bg-gray-900">
-            <h2 className="text-lg font-bold">Réponse B</h2>
-            <pre>{responseB}</pre>
-          </div>
-        </div>
-      </main>
+  const pane = (
+    label: string,
+    modelName: string,
+    response: string,
+    loading: boolean
+  ) => (
+    <div className="flex min-h-[200px] flex-col rounded-xl border border-[#232830] bg-[#12151a]">
+      <div className="flex items-center justify-between border-b border-[#232830] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-[#8b94a1]">
+        <span>{label}</span>
+        <span className="normal-case tracking-normal">{modelName}</span>
+      </div>
+      <div className="font-mono-out flex-1 whitespace-pre-wrap p-4 text-[13px] leading-relaxed text-[#c9d1dc]">
+        {response || (
+          <span className="font-sans text-[#8b94a1]">
+            {loading ? 'Génération…' : '—'}
+          </span>
+        )}
+      </div>
     </div>
+  );
+
+  return (
+    <main className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-4 p-4 md:p-6">
+      <h1 className="text-lg font-bold">Comparaison A/B</h1>
+      <textarea
+        className="min-h-[100px] w-full resize-y rounded-xl border border-[#232830] bg-[#171b21] px-3.5 py-3 text-sm text-[#e6e9ee] outline-none focus:border-[#6366f1]"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Entrez votre input ici…"
+      />
+      <div>
+        <button
+          className="h-11 rounded-xl bg-[#6366f1] px-5 text-sm font-semibold text-white transition hover:bg-[#5457e8] active:scale-95 disabled:opacity-50"
+          onClick={handleGenerate}
+          disabled={loadingA || loadingB || !input.trim()}
+        >
+          {loadingA || loadingB ? 'Génération…' : 'Générer'}
+        </button>
+      </div>
+      <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
+        {pane('Réponse A', models[0].name, responseA, loadingA)}
+        {pane('Réponse B', models[2].name, responseB, loadingB)}
+      </div>
+    </main>
   );
 }
