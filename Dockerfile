@@ -14,6 +14,9 @@ RUN npm run build
 # Stage: Final
 FROM node:22-alpine
 WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ./node_modules
+RUN npm prune --omit=dev
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 COPY --from=build /app/package*.json ./
