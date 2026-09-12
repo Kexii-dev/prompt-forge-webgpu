@@ -1,69 +1,66 @@
 'use client';
 
-import { useState } from 'react';
-import { createModelProvider } from '../lib/providers';
-import { models } from '../lib/models';
+import { useState, useEffect } from 'react';
+import { isWebGPUSupported, getAdapterLimits } from '../../lib/webgpu';
+import { models } from '../../lib/models';
 
-export default function Home() {
-  const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function SettingsPage() {
+  const [webGPUSupported, setWebGPUSupported] = useState(false);
+  const [adapterLimits, setAdapterLimits] = useState<GPUSupportedLimits | null>(null);
   const [selectedModel, setSelectedModel] = useState(models[1].id); // Default to Équilibré
 
-  const modelProvider = createModelProvider();
+  useEffect(() => {
+    setWebGPUSupported(isWebGPUSupported());
+    getAdapterLimits().then(setAdapterLimits);
+  }, []);
 
-  const handleGenerate = async () => {
-    setLoading(true);
-    setResponse('');
-
-    try {
-      await modelProvider.load(selectedModel);
-      const generator = modelProvider.generate([prompt], { temperature: 0.7, maxLength: 100 });
-
-      for await (const chunk of generator) {
-        setResponse((prev) => prev + chunk);
-      }
-    } catch (error) {
-      console.error('Error generating response:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedModel(event.target.value);
   };
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <h1 className="text-2xl font-bold">Prompt Forge WebGPU</h1>
-        <textarea
-          className="w-full h-40 p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Entrez votre prompt ici..."
-        />
-        <div className="flex justify-between items-center">
-          <span>{prompt.length} caractères</span>
+        <h1 className="text-2xl font-bold">Paramètres</h1>
+        <div>
+          <label className="block mb-2 font-medium">Choix du modèle</label>
+          <select
+            className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedModel}
+            onChange={handleModelChange}
+          >
+            {models.map((model) => (
+              <option key={model.id} value={model.id} disabled={model.disabled}>
+                {model.name} {model.disabled ? `(Désactivé - ${model.tooltip})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <h2 className="text-lg font-bold">Diagnostic WebGPU</h2>
+          <p>Support WebGPU : {webGPUSupported ? 'Oui' : 'Non'}</p>
+          {adapterLimits && (
+            <div>
+              <p>Limites de l&apos;adaptateur GPU:</p>
+              <ul>
+                <li>Taille texture 2D max : {adapterLimits.maxTextureDimension2D}</li>
+                <li>Buffers de storage max / stage : {adapterLimits.maxStorageBuffersPerShaderStage}</li>
+                <li>Taille buffer max : {adapterLimits.maxBufferSize}</li>
+                <li>Bind groups max : {adapterLimits.maxBindGroups}</li>
+                <li>Mémoire uniform par binding : {adapterLimits.maxUniformBufferBindingSize}</li>
+              </ul>
+            </div>
+          )}
+        </div>
+        <div>
+          <h2 className="text-lg font-bold">Gestion du cache des poids</h2>
           <button
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-500 text-white gap-2 hover:bg-blue-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            onClick={handleGenerate}
-            disabled={loading}
+            onClick={() => console.log('Clear cache')}
           >
-            {loading ? 'Génération...' : 'Générer'}
+            Tout effacer
           </button>
         </div>
-        <div className="w-full p-4 border border-gray-300 rounded">
-          <pre>{response}</pre>
-        </div>
-        <select
-          className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          {models.map((model) => (
-            <option key={model.id} value={model.id} disabled={model.disabled}>
-              {model.name} {model.disabled ? `(Désactivé - ${model.tooltip})` : ''}
-            </option>
-          ))}
-        </select>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a

@@ -1,69 +1,91 @@
 'use client';
 
 import { useState } from 'react';
-import { createModelProvider } from '../lib/providers';
-import { models } from '../lib/models';
+import { createModelProvider } from '../../lib/providers';
+import { models } from '../../lib/models';
 
-export default function Home() {
-  const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(models[1].id); // Default to Équilibré
+export default function ComparePage() {
+  const [input, setInput] = useState('');
+  const [responseA, setResponseA] = useState('');
+  const [responseB, setResponseB] = useState('');
+  const [loadingA, setLoadingA] = useState(false);
+  const [loadingB, setLoadingB] = useState(false);
 
-  const modelProvider = createModelProvider();
+  const modelProviderA = createModelProvider();
+  const modelProviderB = createModelProvider();
 
-  const handleGenerate = async () => {
-    setLoading(true);
-    setResponse('');
+  const handleGenerateA = async () => {
+    setLoadingA(true);
+    setResponseA('');
 
     try {
-      await modelProvider.load(selectedModel);
-      const generator = modelProvider.generate([prompt], { temperature: 0.7, maxLength: 100 });
+      await modelProviderA.load(models[0].id); // Léger
+      const generator = modelProviderA.generate([input], { temperature: 0.7, maxLength: 100 });
 
       for await (const chunk of generator) {
-        setResponse((prev) => prev + chunk);
+        setResponseA((prev) => prev + chunk);
       }
     } catch (error) {
-      console.error('Error generating response:', error);
+      console.error('Error generating response A:', error);
     } finally {
-      setLoading(false);
+      setLoadingA(false);
+    }
+  };
+
+  const handleGenerateB = async () => {
+    setLoadingB(true);
+    setResponseB('');
+
+    try {
+      await modelProviderB.load(models[2].id); // Équilibré
+      const generator = modelProviderB.generate([input], { temperature: 0.7, maxLength: 100 });
+
+      for await (const chunk of generator) {
+        setResponseB((prev) => prev + chunk);
+      }
+    } catch (error) {
+      console.error('Error generating response B:', error);
+    } finally {
+      setLoadingB(false);
     }
   };
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <h1 className="text-2xl font-bold">Prompt Forge WebGPU</h1>
+        <h1 className="text-2xl font-bold">Comparaison A/B</h1>
         <textarea
           className="w-full h-40 p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Entrez votre prompt ici..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Entrez votre input ici..."
         />
         <div className="flex justify-between items-center">
-          <span>{prompt.length} caractères</span>
           <button
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-500 text-white gap-2 hover:bg-blue-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            onClick={handleGenerate}
-            disabled={loading}
+            onClick={handleGenerateA}
+            disabled={loadingA}
           >
-            {loading ? 'Génération...' : 'Générer'}
+            {loadingA ? 'Génération A...' : 'Générer A'}
+          </button>
+          <button
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-500 text-white gap-2 hover:bg-blue-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            onClick={handleGenerateB}
+            disabled={loadingB}
+          >
+            {loadingB ? 'Génération B...' : 'Générer B'}
           </button>
         </div>
-        <div className="w-full p-4 border border-gray-300 rounded">
-          <pre>{response}</pre>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="w-full p-4 border border-gray-300 rounded">
+            <h2 className="text-lg font-bold">Réponse A</h2>
+            <pre>{responseA}</pre>
+          </div>
+          <div className="w-full p-4 border border-gray-300 rounded">
+            <h2 className="text-lg font-bold">Réponse B</h2>
+            <pre>{responseB}</pre>
+          </div>
         </div>
-        <select
-          className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          {models.map((model) => (
-            <option key={model.id} value={model.id} disabled={model.disabled}>
-              {model.name} {model.disabled ? `(Désactivé - ${model.tooltip})` : ''}
-            </option>
-          ))}
-        </select>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
