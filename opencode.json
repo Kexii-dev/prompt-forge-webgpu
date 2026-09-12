@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "runpod": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "RunPod vLLM (Qwen2.5-Coder-32B)",
+      "options": {
+        "baseURL": "https://1ubs7jbbgtr9db-8000.proxy.runpod.net/v1"
+      },
+      "models": {
+        "qwen-coder-32b": {
+          "name": "Qwen2.5-Coder-32B-Instruct-AWQ",
+          "limit": { "context": 32768, "output": 8192 }
+        }
+      }
+    }
+  },
+  "model": "runpod/qwen-coder-32b",
+  "small_model": "runpod/qwen-coder-32b",
+  "permission": { "edit": "allow", "bash": "allow", "webfetch": "allow" }
+}
