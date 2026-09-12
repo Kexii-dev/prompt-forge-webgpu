@@ -8,24 +8,43 @@ export default function SettingsPage() {
   const [webGPUSupported, setWebGPUSupported] = useState(false);
   const [adapterLimits, setAdapterLimits] = useState<GPUSupportedLimits | null>(null);
   const [selectedModel, setSelectedModel] = useState(models[1].id); // Default to Équilibré
+  const [cacheNames, setCacheNames] = useState<string[]>([]);
+  const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 
   useEffect(() => {
     setWebGPUSupported(isWebGPUSupported());
     getAdapterLimits().then(setAdapterLimits);
+    caches.keys().then((keys) => setCacheNames(keys.map(key => key.toString())));
   }, []);
 
   const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedModel(event.target.value);
   };
 
+  const handleDeleteCache = async (cacheName: string) => {
+    await caches.delete(cacheName);
+    setCacheNames(cacheNames.filter(name => name !== cacheName));
+  };
+
+  const handleDeleteAllCaches = async () => {
+    if (confirmDeleteAll) {
+      const keys = await caches.keys();
+      for (const key of keys) {
+        await caches.delete(key);
+      }
+      setCacheNames([]);
+    }
+    setConfirmDeleteAll(!confirmDeleteAll);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 bg-gray-950">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start text-white">
         <h1 className="text-2xl font-bold">Paramètres</h1>
         <div>
           <label className="block mb-2 font-medium">Choix du modèle</label>
           <select
-            className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white"
             value={selectedModel}
             onChange={handleModelChange}
           >
@@ -54,61 +73,27 @@ export default function SettingsPage() {
         </div>
         <div>
           <h2 className="text-lg font-bold">Gestion du cache des poids</h2>
+          <ul>
+            {cacheNames.map((cacheName) => (
+              <li key={cacheName} className="flex justify-between items-center">
+                {cacheName}
+                <button
+                  className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-red-500 text-white gap-2 hover:bg-red-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+                  onClick={() => handleDeleteCache(cacheName)}
+                >
+                  Supprimer
+                </button>
+              </li>
+            ))}
+          </ul>
           <button
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-500 text-white gap-2 hover:bg-blue-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            onClick={() => console.log('Clear cache')}
+            className="mt-4 rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-500 text-white gap-2 hover:bg-blue-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            onClick={handleDeleteAllCaches}
           >
-            Tout effacer
+            {confirmDeleteAll ? 'Confirmer Tout Effacer' : 'Tout Effacer'}
           </button>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Apprendre
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Exemples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Aller vers nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }

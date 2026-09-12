@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prompt Forge WebGPU
 
-## Getting Started
+## Présentation
 
-First, run the development server:
+Prompt Forge WebGPU est une application permettant de créer, structurer, tester et optimiser des prompts à l'aide de modèles exécutés localement dans le navigateur. Cette application utilise WebGPU pour des performances optimales et offre trois profils de modèle : Léger, Équilibré et Avancé.
+
+## Prérequis
+
+- Navigateur WebGPU compatible (Chrome/Edge 113+)
+
+## Développement
+
+### Installation
+
+1. Clonez le dépôt :
+   ```bash
+   git clone https://github.com/votre-repo/prompt-forge-webgpu.git
+   cd prompt-forge-webgpu
+   ```
+
+2. Installez les dépendances :
+   ```bash
+   npm install
+   ```
+
+### Lancement du serveur de développement
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur pour voir le résultat.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Construction
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Pour construire l'application en mode production :
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Docker
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Construction de l'image Docker
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker build -t prompt-forge-webgpu .
+```
 
-## Deploy on Vercel
+### Exécution du conteneur Docker
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+docker run -p 3000:3000 prompt-forge-webgpu
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Catalogue des modèles
+
+- **Léger** : Qwen2.5-0.5B/1.5B-Instruct ou Llama-3.2-1B-Instruct (q4) (<1,5 Go VRAM)
+- **Équilibré** : Qwen2.5-3B-Instruct, Llama-3.2-3B-Instruct ou Phi-3.5-mini-instruct (q4) (~2-2,5 Go VRAM)
+- **Avancé** : Non disponible pour VRAM < 6 Go
+
+## Limites connues
+
+- Le profil Avancé est désactivé pour les configurations avec moins de 6 Go de VRAM.
