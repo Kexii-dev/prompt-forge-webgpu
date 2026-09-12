@@ -10,12 +10,29 @@
       "models": {
         "qwen-coder-32b": {
           "name": "Qwen2.5-Coder-32B-Instruct-AWQ",
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
         }
       }
     }
   },
   "model": "runpod/qwen-coder-32b",
   "small_model": "runpod/qwen-coder-32b",
-  "permission": { "edit": "allow", "bash": "allow", "webfetch": "allow" }
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "webfetch": "allow"
+  },
+  "tools": {
+    "task": false
+  },
+  "agent": {
+    "build": {
+      "tools": {
+        "task": false
+      }
+    }
+  }
 }
