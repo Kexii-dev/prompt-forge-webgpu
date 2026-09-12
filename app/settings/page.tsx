@@ -9,12 +9,16 @@ export default function SettingsPage() {
   const [adapterLimits, setAdapterLimits] = useState<GPUSupportedLimits | null>(null);
   const [selectedModel, setSelectedModel] = useState(models[1].id); // Default to Équilibré
   const [cacheNames, setCacheNames] = useState<string[]>([]);
+  const [cacheApiAvailable, setCacheApiAvailable] = useState(false);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
 
   useEffect(() => {
     setWebGPUSupported(isWebGPUSupported());
     getAdapterLimits().then(setAdapterLimits);
-    caches.keys().then((keys) => setCacheNames(keys.map(key => key.toString())));
+    if (typeof caches !== 'undefined') {
+      setCacheApiAvailable(true);
+      caches.keys().then((keys) => setCacheNames(keys.map(key => key.toString())));
+    }
   }, []);
 
   const handleModelChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -73,6 +77,12 @@ export default function SettingsPage() {
         </div>
         <div>
           <h2 className="text-lg font-bold">Gestion du cache des poids</h2>
+          {!cacheApiAvailable && (
+            <p className="text-sm text-yellow-400">
+              API Cache indisponible : la page est servie en HTTP hors contexte sécurisé
+              (localhost ou HTTPS requis par le navigateur).
+            </p>
+          )}
           <ul>
             {cacheNames.map((cacheName) => (
               <li key={cacheName} className="flex justify-between items-center">
