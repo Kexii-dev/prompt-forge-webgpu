@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prompt Forge WebGPU",
-  description: "Créez, structurez, testez et optimisez vos prompts avec des modèles exécutés localement dans le navigateur.",
+  title: "WebGPU Lab — IA locale dans le navigateur",
+  description: "Lumina Photo et Prompt Machine : des outils d'IA exécutés localement dans le navigateur grâce à WebGPU.",
 };
 
 export default function RootLayout({

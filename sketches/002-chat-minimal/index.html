@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Forge — Chat Minimal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1115;
+    --fg: #eceff3;
+    --muted: #98a2b3;
+    --user: #2b3a55;
+    --ai: #171b22;
+    --border: #262c37;
+    --accent: #7c8cf8;
+    --radius: 16px;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg); color: var(--fg);
+    min-height: 100vh; display: flex; flex-direction: column;
+    max-width: 760px; margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+  }
+  .logo { font-weight: 600; font-size: 15px; }
+  .model-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--ai); border: 1px solid var(--border); border-radius: 999px;
+    font-size: 12.5px; color: var(--muted); padding: 6px 14px; cursor: pointer;
+  }
+  .model-pill b { color: var(--fg); font-weight: 500; }
+  .thread { flex: 1; overflow-y: auto; padding: 8px 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .msg { max-width: 88%; padding: 12px 16px; border-radius: var(--radius); font-size: 14.5px; line-height: 1.65; }
+  .msg.user { align-self: flex-end; background: var(--user); border-bottom-right-radius: 5px; }
+  .msg.ai { align-self: flex-start; background: var(--ai); border: 1px solid var(--border); border-bottom-left-radius: 5px; }
+  .msg .foot { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .composer {
+    position: sticky; bottom: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--bg) 30%);
+  }
+  .box {
+    display: flex; align-items: flex-end; gap: 8px;
+    background: var(--ai); border: 1px solid var(--border); border-radius: 22px; padding: 8px 8px 8px 18px;
+  }
+  textarea {
+    flex: 1; background: none; border: 0; outline: none; color: var(--fg);
+    font-family: inherit; font-size: 15px; resize: none; max-height: 120px; padding: 6px 0;
+  }
+  .send {
+    width: 38px; height: 38px; border-radius: 50%; border: 0; flex-shrink: 0;
+    background: var(--accent); color: #0b0d10; font-size: 17px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hint { text-align: center; font-size: 11px; color: var(--muted); margin-top: 8px; }
+  /* Bottom sheet */
+  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40; }
+  .sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    background: #14181f; border-radius: 18px 18px 0 0; border-top: 1px solid var(--border);
+    padding: 12px 20px 28px; transform: translateY(105%); transition: transform .24s ease;
+    max-width: 760px; margin: 0 auto;
+  }
+  .sheet-bg.open { opacity: 1; pointer-events: auto; }
+  .sheet.open { transform: translateY(0); }
+  .sheet h3 { font-size: 13px; color: var(--muted); font-weight: 500; margin: 8px 0 12px; }
+  .grab { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto; }
+  .opt { display: flex; justify-content: space-between; align-items:center; padding: 13px 4px; border-bottom: 1px solid var(--border); font-size: 14.5px; cursor: pointer; }
+  .opt:last-child { border: 0; }
+  .opt small { color: var(--muted); display:block; font-size: 12px; }
+  .opt .check { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Prompt Forge</div>
+  <button class="model-pill" onclick="toggleSheet(true)"><b>Llama-3.2-3B</b> · 24 tok/s ▾</button>
+</header>
+<div class="thread" id="thread">
+  <div class="msg user">Explique-moi le concept de sparsity dans les transformers en une phrase simple.</div>
+  <div class="msg ai">La sparsity dans les transformers signifie qu'on ne calcule pas toutes les connexions possibles entre les tokens, mais seulement un sous-ensemble pertinent — moins de calcul, quasiment la même qualité.
+    <div class="foot">Llama-3.2-3B · 24,3 tok/s · 100 % local</div>
+  </div>
+</div>
+<div class="composer">
+  <div class="box">
+    <textarea id="ta" rows="1" placeholder="Message…"></textarea>
+    <button class="send" onclick="sendMsg()">↑</button>
+  </div>
+  <div class="hint">Tout tourne dans ton navigateur — aucune donnée envoyée.</div>
+</div>
+<div class="sheet-bg" id="bg" onclick="toggleSheet(false)"></div>
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <h3>MODÈLE</h3>
+  <div class="opt" onclick="pick(this)"><div>Llama-3.2-3B-Instruct<small>1,9 Go · le plus polyvalent</small></div><span class="check">✓</span></div>
+  <div class="opt" onclick="pick(this)"><div>Qwen3-4B<small>2,3 Go · meilleur en français</small></div><span class="check"></span></div>
+  <div class="opt" onclick="pick(this)"><div>Phi-3.5-mini<small>2,1 Go · très rapide</small></div><span class="check"></span></div>
+</div>
+<script>
+  const ta = document.getElementById('ta');
+  ta.addEventListener('input', () => { ta.style.height='auto'; ta.style.height=Math.min(ta.scrollHeight,120)+'px'; });
+  function toggleSheet(open){ document.getElementById('sheet').classList.toggle('open', open); document.getElementById('bg').classList.toggle('open', open); }
+  function pick(el){ document.querySelectorAll('.opt .check').forEach(c=>c.textContent=''); el.querySelector('.check').textContent='✓'; toggleSheet(false); }
+  function sendMsg(){
+    const t = ta.value.trim(); if(!t) return;
+    const th = document.getElementById('thread');
+    th.insertAdjacentHTML('beforeend', `<div class="msg user">${t.replace(/</g,'&lt;')}</div>`);
+    ta.value=''; ta.style.height='auto';
+    const ai = document.createElement('div'); ai.className='msg ai'; ai.textContent='…'; th.appendChild(ai);
+    th.scrollTop = th.scrollHeight;
+    setTimeout(()=>{ ai.innerHTML = 'Voici une réponse générée localement, token par token, directement sur ton GPU via WebGPU.<div class="foot">Llama-3.2-3B · 23,8 tok/s</div>'; th.scrollTop = th.scrollHeight; }, 900);
+  }
+  ta.addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMsg(); }});
+</script>
+</body>
+</html>

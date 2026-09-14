@@ -1,10 +1,10 @@
 import { WebLLMProvider } from './webllm';
 import { TransformersJsProvider } from './transformers';
 import type { ModelProvider } from './types';
-import { isWebGPUSupported } from '../webgpu';
+import { isWebGPUSupportedSync } from '../webgpu';
 
 export function createModelProvider(): ModelProvider {
-  return isWebGPUSupported() ? new WebLLMProvider() : new TransformersJsProvider();
+  return isWebGPUSupportedSync() ? new WebLLMProvider() : new TransformersJsProvider();
 }
 
 export type { ModelProvider, GenerateOptions } from './types';

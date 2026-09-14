@@ -1,117 +1,102 @@
-'use client';
+import Link from 'next/link';
 
-import { useState } from 'react';
-import { createModelProvider } from '../lib/providers';
-import { models } from '../lib/models';
+const apps = [
+  {
+    href: '/lumina-photo',
+    title: 'Lumina Photo',
+    tagline: 'Édition photo assistée par IA',
+    description:
+      'Suppression de fond, upscale, segmentation et retouche — les modèles tournent directement dans votre navigateur via WebGPU. Vos images ne quittent jamais votre machine.',
+    features: ['RMBG-1.4', 'Swin2SR upscale', 'Segment Anything', '100 % local'],
+    accent: '#34d399',
+    hrefExternal: 'https://contabo-mail.tailc79a05.ts.net',
+  },
+  {
+    href: '/prompt-machine',
+    title: 'Prompt Machine',
+    tagline: 'Banc d’essai LLM local',
+    description:
+      'Composez, sauvegardez et comparez vos prompts sur plusieurs modèles exécutés localement. Historique des runs, statistiques de vitesse, comparaison A/B.',
+    features: ['WebLLM / MLC', 'Bibliothèque de prompts', 'Comparaison A/B', 'Stats tok/s'],
+    accent: '#6366f1',
+    hrefExternal: null,
+  },
+];
 
-export default function Home() {
-  const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(models[1].id); // Default to Équilibré
-
-  const modelProvider = createModelProvider();
-
-  const handleGenerate = async () => {
-    setLoading(true);
-    setResponse('');
-
-    try {
-      await modelProvider.load(selectedModel);
-      const generator = modelProvider.generate([prompt], { temperature: 0.7, maxLength: 100 });
-
-      for await (const chunk of generator) {
-        setResponse((prev) => prev + chunk);
-      }
-    } catch (error) {
-      console.error('Error generating response:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start w-full max-w-3xl">
-        <h1 className="text-2xl font-bold">Prompt Forge WebGPU</h1>
-        <textarea
-          className="w-full h-40 p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Entrez votre prompt ici..."
-        />
-        <div className="flex justify-between items-center">
-          <span>{prompt.length} caractères</span>
-          <button
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-blue-500 text-white gap-2 hover:bg-blue-600 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            onClick={handleGenerate}
-            disabled={loading}
+    <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col items-center justify-center gap-10 px-4 py-12 md:py-20">
+      <div className="text-center">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8b94a1]">
+          webgpu.rayroud.com
+        </p>
+        <h1 className="text-3xl font-bold tracking-tight text-[#e6e9ee] md:text-4xl">
+          L’IA qui tourne <span className="text-[#6366f1]">chez vous</span>
+        </h1>
+        <p className="mx-auto mt-4 max-w-[560px] text-[14px] leading-relaxed text-[#8b94a1]">
+          Deux outils propulsés par WebGPU. Aucun serveur d’inférence, aucune donnée envoyée :
+          les modèles sont téléchargés puis exécutés sur votre GPU.
+        </p>
+      </div>
+
+      <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2">
+        {apps.map((app) => (
+          <div
+            key={app.title}
+            className="group flex flex-col rounded-2xl border border-[#232830] bg-[#12151a] p-6 transition-colors hover:border-[#3a4250]"
           >
-            {loading ? 'Génération...' : 'Générer'}
-          </button>
-        </div>
-        <div className="w-full max-w-full p-4 border border-gray-300 rounded max-h-96 overflow-y-auto overflow-x-hidden">
-          <pre className="whitespace-pre-wrap break-all">{response}</pre>
-        </div>
-        <select
-          className="w-full p-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          {models.map((model) => (
-            <option key={model.id} value={model.id} disabled={model.disabled}>
-              {model.name} {model.disabled ? `(Désactivé - ${model.tooltip})` : ''}
-            </option>
-          ))}
-        </select>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Apprendre
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Exemples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Aller vers nextjs.org →
-        </a>
-      </footer>
-    </div>
+            <div className="mb-4 flex items-center gap-3">
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ background: app.accent, boxShadow: `0 0 10px ${app.accent}` }}
+              />
+              <div>
+                <h2 className="text-[17px] font-bold text-[#e6e9ee]">{app.title}</h2>
+                <p className="text-[12px] text-[#8b94a1]">{app.tagline}</p>
+              </div>
+            </div>
+            <p className="mb-5 flex-1 text-[13.5px] leading-relaxed text-[#b6bdcb]">
+              {app.description}
+            </p>
+            <div className="mb-5 flex flex-wrap gap-2">
+              {app.features.map((f) => (
+                <span
+                  key={f}
+                  className="rounded-full border border-[#232830] bg-[#171b21] px-2.5 py-1 text-[11px] text-[#8b94a1]"
+                >
+                  {f}
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2.5">
+              {app.hrefExternal ? (
+                <a
+                  href={app.hrefExternal}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 rounded-xl py-2.5 text-center text-[13.5px] font-semibold text-white transition active:scale-95"
+                  style={{ background: app.accent, color: '#0b0d10' }}
+                >
+                  Ouvrir {app.title} ↗
+                </a>
+              ) : (
+                <Link
+                  href={app.href}
+                  className="flex-1 rounded-xl py-2.5 text-center text-[13.5px] font-semibold text-white transition hover:brightness-110 active:scale-95"
+                  style={{ background: app.accent }}
+                >
+                  Ouvrir {app.title} →
+                </Link>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-center text-[11.5px] text-[#5b6472]">
+        WebGPU requis — Chrome, Edge ou Brave récents. Les modèles sont mis en cache dans le
+        navigateur après le premier téléchargement.
+      </p>
+    </main>
   );
 }

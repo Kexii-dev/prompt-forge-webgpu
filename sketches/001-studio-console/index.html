@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Forge — Studio Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0b0d10;
+    --panel: #12151a;
+    --panel2: #171b21;
+    --border: #232830;
+    --fg: #e6e9ee;
+    --muted: #8b94a1;
+    --accent: #6366f1;
+    --accent-soft: rgba(99,102,241,.14);
+    --ok: #34d399;
+    --radius: 10px;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg); color: var(--fg);
+    min-height: 100vh; display: flex; flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    background: var(--panel); position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-weight: 700; font-size: 15px; letter-spacing: -.01em; display:flex; align-items:center; gap:8px; }
+  .logo .dot { width:8px; height:8px; border-radius:50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  nav { display: flex; gap: 4px; }
+  nav a {
+    color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500;
+    padding: 6px 12px; border-radius: 7px;
+  }
+  nav a.active { color: var(--fg); background: var(--accent-soft); }
+  nav a:hover { color: var(--fg); }
+  main { flex: 1; display: grid; grid-template-columns: 300px 1fr; gap: 0; max-width: 1400px; width: 100%; margin: 0 auto; }
+  aside {
+    border-right: 1px solid var(--border); background: var(--panel);
+    padding: 16px; display: flex; flex-direction: column; gap: 18px;
+  }
+  .field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display:block; margin-bottom: 6px; }
+  select, input[type=range] { width: 100%; }
+  select {
+    background: var(--panel2); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 10px; font-size: 13.5px; font-family: inherit;
+    appearance: none;
+  }
+  .slider-row { display:flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+  .slider-row output { font-family: 'JetBrains Mono', monospace; color: var(--fg); }
+  input[type=range] { accent-color: var(--accent); }
+  .model-status {
+    margin-top: auto; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--panel2); font-size: 12px; color: var(--muted);
+  }
+  .model-status .bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .model-status .bar i { display:block; height:100%; width: 100%; background: var(--ok); border-radius: 3px; }
+  .model-status b { color: var(--fg); font-weight:600; }
+  .stage { display: flex; flex-direction: column; min-width: 0; }
+  .output {
+    flex: 1; padding: 20px 24px; overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.7;
+    white-space: pre-wrap; color: #c9d1dc;
+  }
+  .output .meta { color: var(--muted); font-size: 11.5px; font-family: 'Inter', sans-serif; margin-bottom: 14px; display:flex; gap:16px; }
+  .composer { border-top: 1px solid var(--border); background: var(--panel); padding: 14px 20px; }
+  .composer .row { display: flex; gap: 10px; }
+  textarea {
+    flex: 1; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--fg); font-family: inherit; font-size: 14px; padding: 12px 14px;
+    resize: none; min-height: 52px; max-height: 160px; outline: none;
+  }
+  textarea:focus { border-color: var(--accent); }
+  .btn {
+    background: var(--accent); color: #fff; border: 0; border-radius: var(--radius);
+    font-weight: 600; font-size: 14px; padding: 0 22px; cursor: pointer; align-self: flex-end;
+    height: 44px; transition: transform .06s ease, background .15s;
+  }
+  .btn:hover { background: #5457e8; } .btn:active { transform: scale(.97); }
+  .btn.secondary { background: var(--panel2); color: var(--fg); border: 1px solid var(--border); }
+  .chips { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .chip {
+    font-size: 12px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; cursor: pointer; background: transparent;
+  }
+  .chip:hover { color: var(--fg); border-color: var(--accent); }
+  /* Mobile */
+  .drawer-toggle { display: none; }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+    aside {
+      position: fixed; inset: 52px 0 auto 0; z-index: 20; max-height: 60vh; overflow-y: auto;
+      border-right: 0; border-bottom: 1px solid var(--border);
+      transform: translateY(-110%); transition: transform .22s ease;
+    }
+    aside.open { transform: translateY(0); }
+    .drawer-toggle {
+      display: inline-flex; align-items:center; gap:6px;
+      background: var(--panel2); border: 1px solid var(--border); color: var(--fg);
+      border-radius: 7px; font-size: 12.5px; padding: 6px 10px; font-family: inherit;
+    }
+    .composer { position: sticky; bottom: 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="dot"></span>Prompt Forge</div>
+  <nav>
+    <a href="#" class="active">Studio</a>
+    <a href="#">Comparer</a>
+    <a href="#">Réglages</a>
+  </nav>
+  <button class="drawer-toggle" onclick="document.querySelector('aside').classList.toggle('open')">⚙ Modèle</button>
+</header>
+<main>
+  <aside>
+    <div class="field">
+      <label>Modèle</label>
+      <select>
+        <option>Llama-3.2-3B-Instruct</option>
+        <option>Qwen3-4B</option>
+        <option>Phi-3.5-mini</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="slider-row"><label style="margin:0">Température</label><output>0.7</output></div>
+      <input type="range" min="0" max="2" step="0.1" value="0.7">
+    </div>
+    <div class="field">
+      <div class="slider-row"><label style="margin:0">Max tokens</label><output>512</output></div>
+      <input type="range" min="64" max="4096" step="64" value="512">
+    </div>
+    <div class="field">
+      <div class="slider-row"><label style="margin:0">Top-p</label><output>0.9</output></div>
+      <input type="range" min="0" max="1" step="0.05" value="0.9">
+    </div>
+    <div class="model-status">
+      <b>● Modèle chargé</b> — Llama-3.2-3B<br>1,9 Go · 24,3 tok/s · WebGPU fp16
+      <div class="bar"><i></i></div>
+    </div>
+  </aside>
+  <section class="stage">
+    <div class="output" id="out"><div class="meta"><span>Llama-3.2-3B</span><span>T 0.7</span><span>24,3 tok/s</span></div>La sparsity dans les transformers signifie qu'on ne calcule pas toutes les connexions possibles entre les tokens, mais seulement un sous-ensemble pertinent — ce qui réduit drastiquement le coût de calcul tout en conservant l'essentiel des performances.</div>
+    <div class="composer">
+      <div class="row">
+        <textarea placeholder="Décris ce que tu veux générer… (Entrée pour envoyer, Maj+Entrée pour sauter une ligne)"></textarea>
+        <button class="btn" onclick="gen()">Générer</button>
+      </div>
+      <div class="chips">
+        <button class="chip">Résume ce texte</button>
+        <button class="chip">Traduis en anglais</button>
+        <button class="chip">Explique simplement</button>
+        <button class="chip">Style formel</button>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+function gen(){
+  const out = document.getElementById('out');
+  out.innerHTML = '<div class="meta"><span>Llama-3.2-3B</span><span>T 0.7</span><span id="tps">…</span></div><span id="stream"></span><span style="opacity:.6">▊</span>';
+  const text = "Le mécanisme d'attention calcule normalement une matrice N×N de scores entre tous les tokens. Avec la sparsity, chaque token n'attend qu'à une fenêtre locale ou à des tokens pivots, faisant passer la complexité de O(N²) à presque O(N).";
+  let i = 0;
+  const el = document.getElementById('stream');
+  const t0 = performance.now();
+  const iv = setInterval(() => {
+    el.textContent += text.slice(i, i+3); i += 3;
+    if (i >= text.length) { clearInterval(iv);
+      document.querySelector('#out span[style]').remove();
+      document.getElementById('tps').textContent = Math.round(text.length/4/((performance.now()-t0)/1000)) + ' tok/s';
+    }
+  }, 30);
+}
+</script>
+</body>
+</html>
