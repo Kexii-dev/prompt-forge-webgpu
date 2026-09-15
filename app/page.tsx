@@ -1,6 +1,16 @@
 import Link from 'next/link';
 
-const apps = [
+type AppCard = {
+  href: string;
+  title: string;
+  tagline: string;
+  description: string;
+  features: string[];
+  accent: string;
+  hrefExternal: string | null;
+};
+
+const apps: AppCard[] = [
   {
     href: '/lumina-photo',
     title: 'Lumina Photo',
@@ -9,7 +19,9 @@ const apps = [
       'Suppression de fond, upscale, segmentation et retouche — les modèles tournent directement dans votre navigateur via WebGPU. Vos images ne quittent jamais votre machine.',
     features: ['RMBG-1.4', 'Swin2SR upscale', 'Segment Anything', '100 % local'],
     accent: '#34d399',
-    hrefExternal: 'https://contabo-mail.tailc79a05.ts.net',
+    // Lumen migré VPS2 -> VPS3 (conteneur photo-editor-dev) le 15/09/2026,
+    // exposé publiquement via nginx VPS1 + Let's Encrypt.
+    hrefExternal: 'https://lumina.rayroud.com',
   },
   {
     href: '/prompt-machine',

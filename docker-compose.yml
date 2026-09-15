@@ -4,13 +4,10 @@ services:
     container_name: prompt-forge
     restart: unless-stopped
     ports:
-      - "100.112.244.34:3010:3000"
+      # Déploiement VPS3 (vps3-monitor) : nginx de VPS1 (webgpu.rayroud.com)
+      # proxy vers 100.90.109.54:3010. UFW VPS3 n'expose 3010 que sur tailscale0.
+      # (l'ancienne valeur "100.112.244.34:3010" était l'IP tailnet de VPS1 — obsolète ici)
+      - "3010:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-    networks:
-      - webstack_webnet
-
-networks:
-  webstack_webnet:
-    external: true
